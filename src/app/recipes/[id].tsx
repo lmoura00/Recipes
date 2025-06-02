@@ -44,25 +44,33 @@ const Home = () => {
 
   const [data, setData] = useState<RecipesResponse | null>(null);
   const [isLoadingPage, setIsLoadingPage] = useState(true);
+  const [apiError, setApiError] = useState<string | null>(null);
   const router = useRouter();
   const { addFavorite, removeFavorite, isFavorite, loadingFavorites } = useFavorites();
 
+  const fetchData = async () => {
+    if (!recipeId) {
+      setIsLoadingPage(false);
+      setApiError("ID da receita inválido.");
+      return;
+    }
+    setIsLoadingPage(true);
+    setApiError(null);
+    try {
+      const response = await axios.get(
+        `https://dummyjson.com/recipes/${recipeId}`
+      );
+      setData(response.data);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setData(null);
+      setApiError("Não foi possível carregar os detalhes da receita. Verifique sua conexão e tente novamente.");
+    } finally {
+      setIsLoadingPage(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      if (!recipeId) return;
-      setIsLoadingPage(true);
-      try {
-        const response = await axios.get(
-          `https://dummyjson.com/recipes/${recipeId}`
-        );
-        setData(response.data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setData(null);
-      } finally {
-        setIsLoadingPage(false);
-      }
-    };
     fetchData();
   }, [recipeId]);
 
@@ -71,6 +79,21 @@ const Home = () => {
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#007BFF" />
         <Text style={styles.loadingText}>Carregando...</Text>
+      </View>
+    );
+  }
+
+  if (apiError && !data) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Ionicons name="cloud-offline-outline" size={60} color="#777" style={{marginBottom: 15}} />
+        <Text style={styles.errorText}>{apiError}</Text>
+        <TouchableOpacity onPress={fetchData} style={styles.retryButton}>
+            <Text style={styles.retryButtonText}>Tentar Novamente</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => router.back()} style={[styles.backButtonError, {marginTop: 10}]}>
+            <Text style={styles.backButtonErrorText}>Voltar</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -238,14 +261,27 @@ const styles = StyleSheet.create({
     color: "#D32F2F",
     marginBottom: 20,
   },
-  backButtonError: {
+  retryButton: {
     backgroundColor: "#007BFF",
     paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingHorizontal: 25,
+    borderRadius: 8,
+    elevation: 2,
+  },
+  retryButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  backButtonError: {
+    borderColor: "#777",
+    borderWidth: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 25,
     borderRadius: 8,
   },
   backButtonErrorText: {
-    color: "#fff",
+    color: "#555",
     fontSize: 16,
     fontWeight: 'bold',
   },

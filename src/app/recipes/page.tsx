@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   View,
   Text,
@@ -32,17 +32,28 @@ type Recipe = {
 
 type RecipesResponseFromAPI = {
   recipes: Recipe[];
-  total?: number;
-  skip?: number;
-  limit?: number;
+  total: number;
+  skip: number;
+  limit: number;
 };
 
+const PAGE_LIMIT = 20;
+
 const RecipesPage = () => {
-  const [allFetchedRecipes, setAllFetchedRecipes] = useState<Recipe[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [search, setSearch] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const router = useRouter();
   const params = useLocalSearchParams<{ cuisine?: string }>();
+
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [filterOptionsError, setFilterOptionsError] = useState<string | null>(null);
+
+  const [skip, setSkip] = useState(0);
+  const [totalRecipes, setTotalRecipes] = useState(0);
+  const [hasMoreToLoad, setHasMoreToLoad] = useState(true);
 
   const [availableCuisines, setAvailableCuisines] = useState<string[]>(['Todas']);
   const [availableMealTypes, setAvailableMealTypes] = useState<string[]>(['Todos']);
@@ -63,14 +74,29 @@ const RecipesPage = () => {
     : "Receitas";
 
   useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(search);
+      setRecipes([]); 
+      setSkip(0);
+      setHasMoreToLoad(true);
+    }, 500); 
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [search]);
+  
+  useEffect(() => {
     const fetchFilterOptions = async () => {
+      setFilterOptionsError(null);
       try {
         const cuisineTagsRes = await axios.get<string[]>('https://dummyjson.com/recipes/tags');
         const uniqueCuisines = [...new Set([...(params.cuisine ? [params.cuisine] : []), ...cuisineTagsRes.data])];
         setAvailableCuisines(['Todas', ...uniqueCuisines.sort()]);
         
-        const recipesForMealTypes = await axios.get<RecipesResponseFromAPI>('https://dummyjson.com/recipes?limit=50&select=mealType');
+        const recipesForMealTypes = await axios.get<RecipesResponseFromAPI>('https://dummyjson.com/recipes?limit=100&select=mealType,difficulty');
         const allMealTypesFromRecipes: string[] = [];
+        
         recipesForMealTypes.data.recipes.forEach(recipe => {
           if (recipe.mealType) {
             recipe.mealType.forEach(mt => {
@@ -85,6 +111,7 @@ const RecipesPage = () => {
 
       } catch (error) {
         console.error("Falha ao buscar opções de filtro:", error);
+        setFilterOptionsError("Não foi possível carregar opções de filtro.");
         if (availableCuisines.length <= 1) setAvailableCuisines(['Todas', ...(params.cuisine ? [params.cuisine] : [])]);
         if (availableMealTypes.length <= 1) setAvailableMealTypes(['Todos']);
       }
@@ -92,31 +119,56 @@ const RecipesPage = () => {
     fetchFilterOptions();
   }, [params.cuisine]);
 
-  useEffect(() => {
-    const fetchData = async () => {
+  const fetchData = useCallback(async (isInitialLoad = false) => {
+    if (!isInitialLoad && loadingMore) return;
+    if (isInitialLoad) {
       setLoading(true);
-      setAllFetchedRecipes([]);
-      let url = "https://dummyjson.com/recipes?limit=100"; 
-      
-      if (activeCuisine && activeCuisine !== 'Todas') {
-        url = `https://dummyjson.com/recipes/tag/${activeCuisine.toLowerCase().replace(' ', '-') }?limit=100`;
-      }
+      setSkip(0);
+      setRecipes([]);
+      setHasMoreToLoad(true);
+    } else {
+      setLoadingMore(true);
+    }
+    setApiError(null);
+    
+    let currentSkip = isInitialLoad ? 0 : skip;
+    let url = "";
 
-      try {
-        const response = await axios.get<RecipesResponseFromAPI>(url);
-        setAllFetchedRecipes(response.data.recipes || []);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setAllFetchedRecipes([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [activeCuisine]);
+    if (debouncedSearchTerm) {
+      url = `https://dummyjson.com/recipes/search?q=${encodeURIComponent(debouncedSearchTerm)}&limit=${PAGE_LIMIT}&skip=${currentSkip}`;
+    } else if (activeCuisine && activeCuisine !== 'Todas') {
+      url = `https://dummyjson.com/recipes/tag/${activeCuisine.toLowerCase().replace(' ', '-') }?limit=${PAGE_LIMIT}&skip=${currentSkip}`;
+    } else {
+      url = `https://dummyjson.com/recipes?limit=${PAGE_LIMIT}&skip=${currentSkip}`;
+    }
 
-  const filteredRecipes = useMemo(() => {
-    let recipesToFilter = [...allFetchedRecipes];
+    try {
+      const response = await axios.get<RecipesResponseFromAPI>(url);
+      const fetchedRecipes = response.data.recipes || [];
+      setRecipes(prev => isInitialLoad ? fetchedRecipes : [...prev, ...fetchedRecipes]);
+      setTotalRecipes(response.data.total || 0);
+      setSkip(currentSkip + fetchedRecipes.length);
+      if (fetchedRecipes.length === 0 || (isInitialLoad ? fetchedRecipes.length : recipes.length + fetchedRecipes.length) >= (response.data.total || 0) ) {
+        setHasMoreToLoad(false);
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setApiError("Não foi possível carregar as receitas. Verifique sua conexão.");
+      setHasMoreToLoad(false);
+    } finally {
+      if (isInitialLoad) setLoading(false);
+      setLoadingMore(false);
+    }
+  }, [activeCuisine, debouncedSearchTerm, skip, loadingMore, recipes.length]);
+
+
+  useEffect(() => {
+    fetchData(true);
+  }, [activeCuisine, debouncedSearchTerm]);
+
+
+  const clientSideFilteredRecipes = useMemo(() => {
+    let recipesToFilter = [...recipes];
 
     if (activeMealType && activeMealType !== 'Todos') {
       recipesToFilter = recipesToFilter.filter(
@@ -128,25 +180,13 @@ const RecipesPage = () => {
         (recipe) => recipe.difficulty.toLowerCase() === activeDifficulty.toLowerCase()
       );
     }
-
-    if (search) {
-      const searchTerm = search.toLowerCase();
-      recipesToFilter = recipesToFilter.filter((recipe) => {
-        const nameMatch = recipe.name.toLowerCase().includes(searchTerm);
-        const ingredientsMatch =
-          recipe.ingredients &&
-          Array.isArray(recipe.ingredients) &&
-          recipe.ingredients.some((ingredient) =>
-            ingredient.toLowerCase().includes(searchTerm)
-          );
-        return nameMatch || ingredientsMatch;
-      });
-    }
     return recipesToFilter;
-  }, [allFetchedRecipes, search, activeMealType, activeDifficulty]);
+  }, [recipes, activeMealType, activeDifficulty]);
 
   const handleApplyFilters = () => {
-    setActiveCuisine(tempSelectedCuisine);
+    if (activeCuisine !== tempSelectedCuisine) {
+        setActiveCuisine(tempSelectedCuisine); 
+    }
     setActiveMealType(tempSelectedMealType);
     setActiveDifficulty(tempSelectedDifficulty);
     setIsFilterModalVisible(false);
@@ -157,9 +197,13 @@ const RecipesPage = () => {
     setTempSelectedCuisine(initialCuisine); 
     setTempSelectedMealType('Todos');
     setTempSelectedDifficulty('Todas');
-    setActiveCuisine(initialCuisine);
+    
+    if (activeCuisine !== initialCuisine) {
+        setActiveCuisine(initialCuisine);
+    }
     setActiveMealType('Todos');
     setActiveDifficulty('Todos');
+    setSearch(""); 
     setIsFilterModalVisible(false);
   };
   
@@ -168,6 +212,12 @@ const RecipesPage = () => {
     setTempSelectedMealType(activeMealType);
     setTempSelectedDifficulty(activeDifficulty);
     setIsFilterModalVisible(true);
+  };
+
+  const handleLoadMore = () => {
+    if (!loadingMore && hasMoreToLoad) {
+       fetchData(false);
+    }
   };
 
   const renderRecipeItem = ({ item }: { item: Recipe }) => (
@@ -184,16 +234,41 @@ const RecipesPage = () => {
     </TouchableOpacity>
   );
 
-  const renderEmptyListComponent = () => (
-    <View style={styles.centeredMessageContainer}>
-      <Text style={styles.emptyText}>
-        Nenhuma receita encontrada com estes critérios.
-      </Text>
-      {(search || (activeCuisine && activeCuisine !== 'Todas') || (activeMealType && activeMealType !== 'Todos') || (activeDifficulty && activeDifficulty !== 'Todas')) && 
-        <Text style={styles.emptySubtitleText}>Tente buscar por outros termos ou ajustar os filtros.</Text>
-      }
-    </View>
-  );
+  const renderListFooter = () => {
+    if (!loadingMore) return null;
+    return (
+      <View style={styles.listFooter}>
+        <ActivityIndicator size="small" color="#007BFF" />
+      </View>
+    );
+  };
+
+  const renderEmptyOrError = () => {
+    if (apiError) {
+        return (
+            <View style={styles.centeredMessageContainer}>
+                <Ionicons name="cloud-offline-outline" size={60} color="#777" style={{marginBottom: 15}} />
+                <Text style={styles.errorText}>{apiError}</Text>
+                <TouchableOpacity onPress={() => fetchData(true)} style={styles.retryButton}>
+                    <Text style={styles.retryButtonText}>Tentar Novamente</Text>
+                </TouchableOpacity>
+            </View>
+        );
+    }
+    if (!loading && clientSideFilteredRecipes.length === 0) {
+      return (
+        <View style={styles.centeredMessageContainer}>
+          <Text style={styles.emptyText}>
+            Nenhuma receita encontrada com estes critérios.
+          </Text>
+          {(search || (activeCuisine && activeCuisine !== 'Todas') || (activeMealType && activeMealType !== 'Todos') || (activeDifficulty && activeDifficulty !== 'Todas')) && 
+            <Text style={styles.emptySubtitleText}>Tente buscar por outros termos ou ajustar os filtros.</Text>
+          }
+        </View>
+      );
+    }
+    return null;
+  }
   
   const renderFilterOption = (item: string, selectedValue: string | null, setter: (value: string) => void, keyPrefix: string) => (
     <TouchableOpacity
@@ -230,7 +305,7 @@ const RecipesPage = () => {
         <View style={styles.searchContainer}>
           <AntDesign name="search1" size={20} color="#888" style={styles.searchIcon} />
           <TextInput
-            placeholder="Nome ou ingrediente..."
+            placeholder="Buscar receitas..."
             style={styles.searchInput}
             value={search}
             onChangeText={setSearch}
@@ -289,18 +364,21 @@ const RecipesPage = () => {
         </TouchableOpacity>
       </Modal>
 
-      {loading ? (
+      {loading && recipes.length === 0 ? (
         <View style={styles.centeredMessageContainer}>
           <ActivityIndicator size="large" color="#007BFF" />
           <Text style={styles.loadingText}>Carregando Receitas...</Text>
         </View>
       ) : (
         <FlatList
-          data={filteredRecipes}
+          data={clientSideFilteredRecipes}
           keyExtractor={(item) => item.id.toString()}
           renderItem={renderRecipeItem}
           contentContainerStyle={styles.listContentContainer}
-          ListEmptyComponent={renderEmptyListComponent}
+          ListEmptyComponent={renderEmptyOrError}
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={renderListFooter}
         />
       )}
     </View>
@@ -393,6 +471,24 @@ const styles = StyleSheet.create({
     marginTop: 15,
     fontWeight: "500",
   },
+  errorText: {
+    fontSize: 17,
+    color: "#D32F2F",
+    textAlign: 'center',
+    marginBottom: 15,
+  },
+  retryButton: {
+    backgroundColor: "#007BFF",
+    paddingVertical: 10,
+    paddingHorizontal: 25,
+    borderRadius: 8,
+    elevation: 2,
+  },
+  retryButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
   emptyText: {
     fontSize: 18,
     color: "#444",
@@ -409,6 +505,10 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     paddingBottom: 20,
     flexGrow: 1,
+  },
+  listFooter: {
+    paddingVertical: 20,
+    alignItems: 'center',
   },
   recipeItem: {
     backgroundColor: "#fff",
