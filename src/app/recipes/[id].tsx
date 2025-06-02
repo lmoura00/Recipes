@@ -6,6 +6,9 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
+  Platform,
+  StatusBar,
+  ActivityIndicator,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import axios from "axios";
@@ -14,6 +17,8 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Entypo from "@expo/vector-icons/Entypo";
 import AntDesign from '@expo/vector-icons/AntDesign';
+import { useFavorites } from "../../context/FavoritesContext";
+
 interface RecipesResponse {
   id: number;
   name: string;
@@ -34,64 +39,122 @@ interface RecipesResponse {
 }
 
 const Home = () => {
-  const { id } = useLocalSearchParams();
+  const { id: recipeIdParam } = useLocalSearchParams<{ id: string }>();
+  const recipeId = Number(recipeIdParam);
+
   const [data, setData] = useState<RecipesResponse | null>(null);
+  const [isLoadingPage, setIsLoadingPage] = useState(true);
   const router = useRouter();
+  const { addFavorite, removeFavorite, isFavorite, loadingFavorites } = useFavorites();
+
   useEffect(() => {
     const fetchData = async () => {
+      if (!recipeId) return;
+      setIsLoadingPage(true);
       try {
-        const response = await axios.get(`https://dummyjson.com/recipes/${id}`);
+        const response = await axios.get(
+          `https://dummyjson.com/recipes/${recipeId}`
+        );
         setData(response.data);
       } catch (error) {
         console.error("Error fetching data:", error);
+        setData(null);
+      } finally {
+        setIsLoadingPage(false);
       }
     };
     fetchData();
-  }, [id]);
+  }, [recipeId]);
 
-  if (!data) {
+  if (isLoadingPage || loadingFavorites) {
     return (
-      <View style={styles.container}>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#007BFF" />
         <Text style={styles.loadingText}>Carregando...</Text>
       </View>
     );
   }
 
+  if (!data) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text style={styles.errorText}>Receita não encontrada.</Text>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButtonError}>
+            <Text style={styles.backButtonErrorText}>Voltar</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  const currentRecipeIsFavorite = isFavorite(data.id);
+
+  const toggleFavorite = () => {
+    if (currentRecipeIsFavorite) {
+      removeFavorite(data.id);
+    } else {
+      addFavorite(data.id);
+    }
+  };
+
   return (
     <View style={styles.container}>
-      {/* Header com botão de voltar e título */}
+      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.buttonBack}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.headerIconButton}
+        >
           <Entypo name="chevron-left" size={28} color="#007BFF" />
         </TouchableOpacity>
-        <Text style={styles.title} numberOfLines={2}>{data.name}</Text>
+        <Text style={styles.headerMainTitle} numberOfLines={2}>
+          {data.name}
+        </Text>
+        <TouchableOpacity
+          onPress={toggleFavorite}
+          style={styles.headerIconButton}
+        >
+          <Ionicons
+            name={currentRecipeIsFavorite ? "heart" : "heart-outline"}
+            size={28}
+            color={currentRecipeIsFavorite ? "#FF453A" : "#007BFF"}
+          />
+        </TouchableOpacity>
       </View>
+
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Image source={{ uri: data.image }} style={styles.image} />
-        {/* Informações principais */}
+
         <View style={styles.infoRow}>
           <View style={styles.infoItem}>
             <Ionicons name="timer-outline" size={20} color="#007BFF" />
-            <Text style={styles.infoText}>{data.prepTimeMinutes + data.cookTimeMinutes} min</Text>
+            <Text style={styles.infoValueText}>
+              {data.prepTimeMinutes + data.cookTimeMinutes} min
+            </Text>
             <Text style={styles.infoLabel}>Total</Text>
           </View>
           <View style={styles.infoItem}>
-            <MaterialCommunityIcons name="account-group" size={20} color="#007BFF" />
-            <Text style={styles.infoText}>{data.servings}</Text>
+            <MaterialCommunityIcons
+              name="account-group"
+              size={20}
+              color="#007BFF"
+            />
+            <Text style={styles.infoValueText}>{data.servings}</Text>
             <Text style={styles.infoLabel}>Porções</Text>
           </View>
           <View style={styles.infoItem}>
             <FontAwesome5 name="star" size={20} color="#FFD700" />
-            <Text style={styles.infoText}>{data.rating}</Text>
+            <Text style={styles.infoValueText}>{data.rating}</Text>
             <Text style={styles.infoLabel}>Avaliação</Text>
           </View>
         </View>
-        {/* Card de informações */}
+
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Detalhes</Text>
           <View style={styles.detailRow}>
             <FontAwesome5 name="weight-hanging" size={16} color="#007BFF" />
-            <Text style={styles.detailText}>Calorias: {data.caloriesPerServing}</Text>
+            <Text style={styles.detailText}>
+              Calorias: {data.caloriesPerServing}
+            </Text>
           </View>
           <View style={styles.detailRow}>
             <MaterialCommunityIcons name="chef-hat" size={16} color="#007BFF" />
@@ -103,14 +166,16 @@ const Home = () => {
           </View>
           <View style={styles.detailRow}>
             <FontAwesome5 name="utensils" size={16} color="#007BFF" />
-            <Text style={styles.detailText}>Tipo: {data.mealType.join(", ")}</Text>
+            <Text style={styles.detailText}>
+              Tipo: {data.mealType.join(", ")}
+            </Text>
           </View>
           <View style={styles.detailRow}>
             <FontAwesome5 name="hashtag" size={16} color="#007BFF" />
             <Text style={styles.detailText}>Tags: {data.tags.join(", ")}</Text>
           </View>
         </View>
-        {/* Ingredientes */}
+
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Ingredientes</Text>
           {data.ingredients.map((item, idx) => (
@@ -120,7 +185,7 @@ const Home = () => {
             </View>
           ))}
         </View>
-        {/* Instruções */}
+
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Instruções</Text>
           {data.instructions.map((item, idx) => (
@@ -132,7 +197,7 @@ const Home = () => {
             </View>
           ))}
         </View>
-        {/* Avaliações */}
+
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Avaliações</Text>
           <View style={styles.detailRow}>
@@ -154,35 +219,61 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f8fafc",
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: "#f8fafc",
+    padding: 20,
+  },
   loadingText: {
     fontSize: 18,
     textAlign: "center",
-    marginTop: 40,
+    marginTop: 10,
     color: "#007BFF",
+  },
+  errorText: {
+    fontSize: 18,
+    textAlign: "center",
+    color: "#D32F2F",
+    marginBottom: 20,
+  },
+  backButtonError: {
+    backgroundColor: "#007BFF",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  backButtonErrorText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
-    paddingTop: 50,
-    paddingBottom: 10,
-    paddingHorizontal: 20,
+    paddingTop: Platform.OS === "android" ? (StatusBar.currentHeight ?? 0) + 10 : 50,
+    paddingBottom: 12,
+    paddingHorizontal: 15,
     backgroundColor: "#fff",
     elevation: 2,
     zIndex: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
   },
-  buttonBack: {
-    marginRight: 10,
+  headerIconButton: {
     padding: 6,
     borderRadius: 20,
-    backgroundColor: "#e6f0fa",
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#222",
+  headerMainTitle: {
     flex: 1,
     textAlign: "center",
-    marginRight: 40,
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#333",
+    marginHorizontal: 5,
   },
   scrollContent: {
     padding: 20,
@@ -209,7 +300,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flex: 1,
   },
-  infoText: {
+  infoValueText: {
     fontSize: 18,
     fontWeight: "bold",
     color: "#007BFF",
