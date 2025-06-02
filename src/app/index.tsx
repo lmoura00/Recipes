@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, FlatList, Image } from "react-native";
 import { Link, useRouter } from "expo-router";
-import axios from "axios";
+import LottieView from "lottie-react-native";
 
 const Index = () => {
   const [loading, setLoading] = useState(true);
@@ -9,18 +9,38 @@ const Index = () => {
   const router = useRouter();
   return (
     <View style={styles.container}>
+      <LottieView
+        autoPlay
+        style={{
+          width: "100%",
+          height: 300,
+          alignSelf: "center",
+        }}
+        source={require("../assets/recipes.json")}
+      />
       <Text style={styles.title}>Receitas APP</Text>
 
       <Text style={styles.text}>Seja bem vindo(a) ao seu app de receitas</Text>
-      <TouchableOpacity onPress={() => router.push("/recipes/page")} style={styles.buttonReceitas}>
-        <Text style={{ fontSize: 18,  marginTop: 10 }}>
-          Receitas
-        </Text>
+      <TouchableOpacity
+        onPress={() => router.push("/recipes/page")}
+        style={styles.buttonReceitas}
+      >
+        <LottieView
+          autoPlay
+          style={{
+            width: "100%",
+            height: 100,
+            alignSelf: "center",
+          }}
+          source={require("../assets/panela.json")}
+        />
+        <Text style={{ fontSize: 18, marginTop: 10 }}>Ver as receitas...</Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => router.push("/about/page")} style={styles.buttonSobre}>
-        <Text style={{ fontSize: 18, marginTop: 10 }}>
-          Sobre o App
-        </Text>
+      <TouchableOpacity
+        onPress={() => router.push("/about/page")}
+        style={styles.buttonSobre}
+      >
+        <Text style={{ fontSize: 18, marginTop: 10 }}>Sobre o App</Text>
       </TouchableOpacity>
     </View>
   );
@@ -35,7 +55,7 @@ const styles = {
     padding: 10,
     width: "100%" as const,
     borderColor: "#ccc",
-    flexDirection: "row" as const,
+    flexDirection: "column" as const,
     alignItems: "center" as const,
     justifyContent: "space-between" as const,
     backgroundColor: "#f9f9f9",
