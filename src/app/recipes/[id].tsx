@@ -17,7 +17,8 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Entypo from "@expo/vector-icons/Entypo";
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { useFavorites } from "../../context/FavoritesContext";
+import { useFavorites } from "../../context/FavoritesContext"; // Ajuste o caminho se necessário
+import { translateWithGoogleAPI } from "../../utils/googleTranslate"; // Ajuste o caminho se necessário
 
 interface RecipesResponse {
   id: number;
@@ -44,51 +45,103 @@ const Home = () => {
 
   const [data, setData] = useState<RecipesResponse | null>(null);
   const [isLoadingPage, setIsLoadingPage] = useState(true);
+  const [isTranslating, setIsTranslating] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const router = useRouter();
   const { addFavorite, removeFavorite, isFavorite, loadingFavorites } = useFavorites();
 
-  const fetchData = async () => {
-    if (!recipeId) {
-      setIsLoadingPage(false);
-      setApiError("ID da receita inválido.");
-      return;
-    }
-    setIsLoadingPage(true);
-    setApiError(null);
-    try {
-      const response = await axios.get(
-        `https://dummyjson.com/recipes/${recipeId}`
-      );
-      setData(response.data);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      setData(null);
-      setApiError("Não foi possível carregar os detalhes da receita. Verifique sua conexão e tente novamente.");
-    } finally {
-      setIsLoadingPage(false);
-    }
-  };
-
   useEffect(() => {
-    fetchData();
+    const fetchDataAndTranslate = async () => {
+      if (!recipeId) {
+        setIsLoadingPage(false);
+        setApiError("ID da receita inválido.");
+        return;
+      }
+      setIsLoadingPage(true);
+      setApiError(null);
+      setData(null);
+
+      try {
+        const response = await axios.get(
+          `https://dummyjson.com/recipes/${recipeId}`
+        );
+        const originalData = response.data as RecipesResponse;
+        setData(originalData); 
+
+        setIsTranslating(true);
+        const textsToTranslate: string[] = [
+          originalData.name,
+          originalData.cuisine,
+          originalData.difficulty,
+          ...originalData.ingredients,
+          ...originalData.instructions,
+          ...originalData.mealType,
+          ...originalData.tags,
+        ];
+        
+        const translatedBatch = await translateWithGoogleAPI(textsToTranslate, 'pt');
+        
+        if (Array.isArray(translatedBatch) && translatedBatch.length === textsToTranslate.length) {
+            let currentIndex = 0;
+            const translatedName = translatedBatch[currentIndex++];
+            const translatedCuisine = translatedBatch[currentIndex++];
+            const translatedDifficulty = translatedBatch[currentIndex++];
+            
+            const translatedIngredients = translatedBatch.slice(currentIndex, currentIndex + originalData.ingredients.length);
+            currentIndex += originalData.ingredients.length;
+            
+            const translatedInstructions = translatedBatch.slice(currentIndex, currentIndex + originalData.instructions.length);
+            currentIndex += originalData.instructions.length;
+
+            const translatedMealTypes = translatedBatch.slice(currentIndex, currentIndex + originalData.mealType.length);
+            currentIndex += originalData.mealType.length;
+
+            const translatedTags = translatedBatch.slice(currentIndex, currentIndex + originalData.tags.length);
+
+            setData({
+                ...originalData,
+                name: translatedName || originalData.name,
+                cuisine: translatedCuisine || originalData.cuisine,
+                difficulty: translatedDifficulty || originalData.difficulty,
+                ingredients: translatedIngredients.length ? translatedIngredients : originalData.ingredients,
+                instructions: translatedInstructions.length ? translatedInstructions : originalData.instructions,
+                mealType: translatedMealTypes.length ? translatedMealTypes : originalData.mealType,
+                tags: translatedTags.length ? translatedTags : originalData.tags,
+            });
+        }
+
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setData(null);
+        setApiError("Não foi possível carregar os detalhes da receita.");
+      } finally {
+        setIsLoadingPage(false);
+        setIsTranslating(false);
+      }
+    };
+
+    fetchDataAndTranslate();
   }, [recipeId]);
 
   if (isLoadingPage || loadingFavorites) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#007BFF" />
-        <Text style={styles.loadingText}>Carregando...</Text>
+        <Text style={styles.loadingText}>Carregando Dados...</Text>
       </View>
     );
   }
 
   if (apiError && !data) {
+    function fetchDataAndTranslate() {
+      throw new Error("Function not implemented.");
+    }
+
     return (
       <View style={styles.loadingContainer}>
         <Ionicons name="cloud-offline-outline" size={60} color="#777" style={{marginBottom: 15}} />
         <Text style={styles.errorText}>{apiError}</Text>
-        <TouchableOpacity onPress={fetchData} style={styles.retryButton}>
+        <TouchableOpacity onPress={() => { setIsLoadingPage(true); fetchDataAndTranslate(); }} style={styles.retryButton}>
             <Text style={styles.retryButtonText}>Tentar Novamente</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => router.back()} style={[styles.backButtonError, {marginTop: 10}]}>
@@ -130,7 +183,7 @@ const Home = () => {
           <Entypo name="chevron-left" size={28} color="#007BFF" />
         </TouchableOpacity>
         <Text style={styles.headerMainTitle} numberOfLines={2}>
-          {data.name}
+          {data.name} {isTranslating && <ActivityIndicator size="small" color="#333" />}
         </Text>
         <TouchableOpacity
           onPress={toggleFavorite}
@@ -146,6 +199,7 @@ const Home = () => {
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Image source={{ uri: data.image }} style={styles.image} />
+        {isTranslating && <ActivityIndicator style={{marginVertical: 5, alignSelf: 'center'}} size="small" color="#007BFF" />}
 
         <View style={styles.infoRow}>
           <View style={styles.infoItem}>

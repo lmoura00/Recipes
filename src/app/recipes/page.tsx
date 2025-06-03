@@ -18,6 +18,8 @@ import axios from "axios";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Entypo from "@expo/vector-icons/Entypo";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { translate } from "../../utils/translations"; // Para filtros e UI
+import { translateWithGoogleAPI } from "../../utils/googleTranslate"; // Para conteúdo dinâmico
 
 type Recipe = {
   id: number;
@@ -51,7 +53,7 @@ const RecipesPage = () => {
   const [apiError, setApiError] = useState<string | null>(null);
   const [filterOptionsError, setFilterOptionsError] = useState<string | null>(null);
 
-  const [skip, setSkip] = useState(0);
+  const [skipNum, setSkipNum] = useState(0);
   const [totalRecipes, setTotalRecipes] = useState(0);
   const [hasMoreToLoad, setHasMoreToLoad] = useState(true);
 
@@ -70,14 +72,14 @@ const RecipesPage = () => {
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
 
   const pageTitle = activeCuisine && activeCuisine !== 'Todas'
-    ? `Receitas: ${activeCuisine.charAt(0).toUpperCase() + activeCuisine.slice(1).replace('-', ' ')}`
+    ? `Receitas: ${translate(activeCuisine).charAt(0).toUpperCase() + translate(activeCuisine).slice(1).replace('-', ' ')}`
     : "Receitas";
 
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(search);
       setRecipes([]); 
-      setSkip(0);
+      setSkipNum(0);
       setHasMoreToLoad(true);
     }, 500); 
 
@@ -123,7 +125,7 @@ const RecipesPage = () => {
     if (!isInitialLoad && loadingMore) return;
     if (isInitialLoad) {
       setLoading(true);
-      setSkip(0);
+      setSkipNum(0);
       setRecipes([]);
       setHasMoreToLoad(true);
     } else {
@@ -131,7 +133,7 @@ const RecipesPage = () => {
     }
     setApiError(null);
     
-    let currentSkip = isInitialLoad ? 0 : skip;
+    let currentSkip = isInitialLoad ? 0 : skipNum;
     let url = "";
 
     if (debouncedSearchTerm) {
@@ -144,10 +146,23 @@ const RecipesPage = () => {
 
     try {
       const response = await axios.get<RecipesResponseFromAPI>(url);
-      const fetchedRecipes = response.data.recipes || [];
+      let fetchedRecipes = response.data.recipes || [];
+
+      if (fetchedRecipes.length > 0 && !debouncedSearchTerm) {
+        const namesToTranslate = fetchedRecipes.map(r => r.name);
+        const translatedNames = await translateWithGoogleAPI(namesToTranslate, 'pt') as string[];
+
+        if (translatedNames.length === namesToTranslate.length) {
+            fetchedRecipes = fetchedRecipes.map((recipe, index) => ({
+                ...recipe,
+                name: translatedNames[index] || recipe.name,
+            }));
+        }
+      }
+      
       setRecipes(prev => isInitialLoad ? fetchedRecipes : [...prev, ...fetchedRecipes]);
       setTotalRecipes(response.data.total || 0);
-      setSkip(currentSkip + fetchedRecipes.length);
+      setSkipNum(currentSkip + fetchedRecipes.length);
       if (fetchedRecipes.length === 0 || (isInitialLoad ? fetchedRecipes.length : recipes.length + fetchedRecipes.length) >= (response.data.total || 0) ) {
         setHasMoreToLoad(false);
       }
@@ -159,7 +174,7 @@ const RecipesPage = () => {
       if (isInitialLoad) setLoading(false);
       setLoadingMore(false);
     }
-  }, [activeCuisine, debouncedSearchTerm, skip, loadingMore, recipes.length]);
+  }, [activeCuisine, debouncedSearchTerm, skipNum, loadingMore, recipes.length]);
 
 
   useEffect(() => {
@@ -270,17 +285,24 @@ const RecipesPage = () => {
     return null;
   }
   
-  const renderFilterOption = (item: string, selectedValue: string | null, setter: (value: string) => void, keyPrefix: string) => (
-    <TouchableOpacity
-      key={`${keyPrefix}-${item}`}
-      style={[styles.filterOption, item === selectedValue && styles.filterOptionSelected]}
-      onPress={() => setter(item)}
-    >
-      <Text style={[styles.filterOptionText, item === selectedValue && styles.filterOptionTextSelected]}>
-        {item.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-      </Text>
-    </TouchableOpacity>
-  );
+  const renderFilterOption = (item: string, selectedValue: string | null, setter: (value: string) => void, keyPrefix: string) => {
+    const displayValue = item === 'Todas' || item === 'Todos' 
+        ? item 
+        : translate(item); 
+
+    return (
+        <TouchableOpacity
+        key={`${keyPrefix}-${item}`}
+        style={[styles.filterOption, item === selectedValue && styles.filterOptionSelected]}
+        onPress={() => setter(item)}
+        >
+        <Text style={[styles.filterOptionText, item === selectedValue && styles.filterOptionTextSelected]}>
+            {displayValue.charAt(0).toUpperCase() + displayValue.slice(1).replace('-', ' ')}
+        </Text>
+        </TouchableOpacity>
+    );
+  };
+
 
   return (
     <View style={styles.container}>
@@ -357,7 +379,7 @@ const RecipesPage = () => {
                 <Text style={styles.applyButtonText}>Aplicar</Text>
               </TouchableOpacity>
             </View>
-             <TouchableOpacity style={styles.closeModalButton} onPress={() => setIsFilterModalVisible(false)}>
+            <TouchableOpacity style={styles.closeModalButton} onPress={() => setIsFilterModalVisible(false)}>
                 <AntDesign name="closecircleo" size={28} color="#ccc" />
             </TouchableOpacity>
           </TouchableOpacity>

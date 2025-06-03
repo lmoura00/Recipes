@@ -41,7 +41,7 @@ const Index = () => {
           >
             <LottieView
               autoPlay
-              loop={false}
+              loop={true}
               style={styles.buttonLottie}
               source={require("../assets/panela.json")}
             />
