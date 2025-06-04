@@ -15,25 +15,15 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.lsm00.recipes",
-      "buildNumber": "1.0.0",
-      "infoPlist": {
-        "UIBackgroundModes": ["fetch", "remote-notification"],
-        "NSAppTransportSecurity": {
-          "NSAllowsArbitraryLoads": true
-        }
-      },
-      "config": {
-        "usesNonExemptEncryption": false,
-        "googleMapsApiKey": "AIzaSyDUyp7OcPnMcwwQejUCRkqGL4hdKd3wq2k"
-      }
+      "bundleIdentifier": "com.lsm-00.Recipes"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./src/assets/icon.png",
         "backgroundColor": "#222222"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.lsm_00.Recipes"
     },
     "web": {
       "bundler": "metro",
