@@ -11,14 +11,24 @@ import { useRouter } from "expo-router";
 import LottieView from "lottie-react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
+const COLORS = {
+  primaryBackground: "#20C997",
+  textPrimary: "#FFFFFF",
+  textSecondary: "#E0E0E0",
+  accentOrange: "#FF8C00",
+  accentYellow: "#FFA500",
+  white: "#FFFFFF",
+  darkerPrimaryBackground: "#1BAA81",
+};
+
 const Index = () => {
   const router = useRouter();
 
   return (
     <View style={styles.container}>
       <StatusBar
-        barStyle={Platform.OS === "ios" ? "dark-content" : "dark-content"}
-        backgroundColor="#f8fafc"
+        barStyle={Platform.OS === "ios" ? "light-content" : "light-content"}
+        backgroundColor={COLORS.primaryBackground}
       />
       <View style={styles.contentContainer}>
         <View style={styles.heroSection}>
@@ -52,7 +62,7 @@ const Index = () => {
             onPress={() => router.push('/favorites/page')}
             style={styles.favoritesButton}
           >
-            <Ionicons name="heart" size={22} color="#fff" />
+            <Ionicons name="heart" size={22} color={COLORS.accentOrange} />
             <Text style={styles.favoritesButtonText}>Meus Favoritos</Text>
           </TouchableOpacity>
 
@@ -71,7 +81,7 @@ const Index = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8fafc",
+    backgroundColor: COLORS.primaryBackground,
     paddingTop: Platform.OS === "android" ? (StatusBar.currentHeight ?? 0) : 0,
   },
   contentContainer: {
@@ -92,15 +102,15 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   title: {
-    fontSize: 30,
+    fontSize: 32,
     fontWeight: "bold",
-    color: "#2c3e50",
+    color: COLORS.textPrimary,
     textAlign: "center",
     marginBottom: 8,
   },
   subtitle: {
-    fontSize: 17,
-    color: "#7f8c8d",
+    fontSize: 18,
+    color: COLORS.textSecondary,
     textAlign: "center",
     paddingHorizontal: 10,
     marginBottom: 20,
@@ -110,7 +120,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   primaryButton: {
-    backgroundColor: "#007BFF",
+    backgroundColor: COLORS.accentOrange,
     paddingVertical: 15,
     paddingHorizontal: 20,
     borderRadius: 12,
@@ -120,24 +130,24 @@ const styles = StyleSheet.create({
     maxWidth: 400,
     marginBottom: 16,
     flexDirection: "column",
-    elevation: 3,
+    elevation: 4,
     shadowColor: "#000",
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 3 },
   },
   buttonLottie: {
-    width: 70,
-    height: 70,
+    width: 60,
+    height: 60,
     marginBottom: 8,
   },
   primaryButtonText: {
     fontSize: 18,
-    color: "#fff",
+    color: COLORS.white,
     fontWeight: "600",
   },
   favoritesButton: {
-    backgroundColor: "#e74c3c",
+    backgroundColor: COLORS.white,
     paddingVertical: 15,
     paddingHorizontal: 20,
     borderRadius: 12,
@@ -152,10 +162,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
+    borderWidth: 1,
+    borderColor: COLORS.accentOrange,
   },
   favoritesButtonText: {
     fontSize: 18,
-    color: "#fff",
+    color: COLORS.accentOrange,
     fontWeight: "600",
     marginLeft: 10,
   },
@@ -165,7 +177,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 12,
     borderWidth: 1.5,
-    borderColor: "#007BFF",
+    borderColor: COLORS.white,
     alignItems: "center",
     justifyContent: "center",
     width: "95%",
@@ -173,7 +185,7 @@ const styles = StyleSheet.create({
   },
   secondaryButtonText: {
     fontSize: 16,
-    color: "#007BFF",
+    color: COLORS.white,
     fontWeight: "600",
   },
 });

@@ -18,8 +18,8 @@ import axios from "axios";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Entypo from "@expo/vector-icons/Entypo";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { translate } from "../../utils/translations"; // Para filtros e UI
-import { translateWithGoogleAPI } from "../../utils/googleTranslate"; // Para conteúdo dinâmico
+import { translate } from "../../utils/translations";
+import { translateWithGoogleAPI } from "../../utils/googleTranslate";
 
 type Recipe = {
   id: number;
@@ -40,6 +40,22 @@ type RecipesResponseFromAPI = {
 };
 
 const PAGE_LIMIT = 20;
+
+const COLORS = {
+  primaryBackground: "#20C997",
+  textPrimary: "#FFFFFF",
+  textSecondary: "#E0E0E0",
+  accentOrange: "#FF8C00",
+  white: "#FFFFFF",
+  darkGrey: "#333",
+  mediumGrey: "#555",
+  lightGrey: "#888",
+  veryLightGrey: "#f0f0f0",
+  superLightGrey: "#f8fafc",
+  errorRed: "#D32F2F",
+  borderColor: "#ddd",
+  lightBlue: "#e6f0fa"
+};
 
 const RecipesPage = () => {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
@@ -253,7 +269,7 @@ const RecipesPage = () => {
     if (!loadingMore) return null;
     return (
       <View style={styles.listFooter}>
-        <ActivityIndicator size="small" color="#007BFF" />
+        <ActivityIndicator size="small" color={COLORS.accentOrange} />
       </View>
     );
   };
@@ -262,7 +278,7 @@ const RecipesPage = () => {
     if (apiError) {
         return (
             <View style={styles.centeredMessageContainer}>
-                <Ionicons name="cloud-offline-outline" size={60} color="#777" style={{marginBottom: 15}} />
+                <Ionicons name="cloud-offline-outline" size={60} color={COLORS.mediumGrey} style={{marginBottom: 15}} />
                 <Text style={styles.errorText}>{apiError}</Text>
                 <TouchableOpacity onPress={() => fetchData(true)} style={styles.retryButton}>
                     <Text style={styles.retryButtonText}>Tentar Novamente</Text>
@@ -306,36 +322,36 @@ const RecipesPage = () => {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.primaryBackground} />
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => router.canGoBack() ? router.back() : router.push('/')}
           style={styles.headerIconButton}
         >
-          <Entypo name="chevron-left" size={28} color="#007BFF" />
+          <Entypo name="chevron-left" size={28} color={COLORS.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle} numberOfLines={1}>{pageTitle}</Text>
         <TouchableOpacity
           onPress={() => router.push("/about/page")}
           style={styles.headerIconButton}
         >
-          <AntDesign name="infocirlceo" size={24} color="#007BFF" />
+          <AntDesign name="infocirlceo" size={24} color={COLORS.textPrimary} />
         </TouchableOpacity>
       </View>
 
       <View style={styles.searchFilterContainer}>
         <View style={styles.searchContainer}>
-          <AntDesign name="search1" size={20} color="#888" style={styles.searchIcon} />
+          <AntDesign name="search1" size={20} color={COLORS.lightGrey} style={styles.searchIcon} />
           <TextInput
             placeholder="Buscar receitas..."
             style={styles.searchInput}
             value={search}
             onChangeText={setSearch}
-            placeholderTextColor="#888"
+            placeholderTextColor={COLORS.lightGrey}
           />
         </View>
         <TouchableOpacity onPress={openFilterModal} style={styles.filterAccessButton}>
-            <Ionicons name="filter" size={22} color="#007BFF" />
+            <Ionicons name="filter" size={22} color={COLORS.accentOrange} />
             <Text style={styles.filterAccessButtonText}>Filtros</Text>
         </TouchableOpacity>
       </View>
@@ -388,7 +404,7 @@ const RecipesPage = () => {
 
       {loading && recipes.length === 0 ? (
         <View style={styles.centeredMessageContainer}>
-          <ActivityIndicator size="large" color="#007BFF" />
+          <ActivityIndicator size="large" color={COLORS.accentOrange} />
           <Text style={styles.loadingText}>Carregando Receitas...</Text>
         </View>
       ) : (
@@ -410,7 +426,7 @@ const RecipesPage = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8fafc",
+    backgroundColor: COLORS.white,
   },
   header: {
     flexDirection: "row",
@@ -418,7 +434,7 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === "android" ? (StatusBar.currentHeight ?? 0) + 10 : 50,
     paddingBottom: 12,
     paddingHorizontal: 10,
-    backgroundColor: "#fff",
+    backgroundColor: COLORS.primaryBackground,
     elevation: 3,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -435,15 +451,15 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 20,
     fontWeight: "bold",
-    color: "#222",
+    color: COLORS.textPrimary,
     marginHorizontal: 5,
   },
   searchFilterContainer: {
-    backgroundColor: "#fff",
+    backgroundColor: COLORS.white,
     paddingVertical: 10,
     paddingHorizontal: 15,
     borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    borderBottomColor: COLORS.veryLightGrey,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between'
@@ -451,7 +467,7 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f0f0f0",
+    backgroundColor: COLORS.veryLightGrey,
     borderRadius: 25,
     paddingHorizontal: 15,
     height: 48,
@@ -464,7 +480,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 16,
-    color: "#333",
+    color: COLORS.darkGrey,
     height: "100%",
   },
   filterAccessButton: {
@@ -472,12 +488,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 8,
     paddingHorizontal: 12,
-    backgroundColor: '#e6f0fa',
+    backgroundColor: COLORS.white,
     borderRadius: 20,
+    borderWidth: 1,
+    borderColor: COLORS.accentOrange,
   },
   filterAccessButtonText: {
     marginLeft: 6,
-    color: '#007BFF',
+    color: COLORS.accentOrange,
     fontWeight: '600',
     fontSize: 15,
   },
@@ -486,54 +504,57 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
+    backgroundColor: COLORS.superLightGrey,
   },
   loadingText: {
     fontSize: 18,
-    color: "#007BFF",
+    color: COLORS.accentOrange,
     marginTop: 15,
     fontWeight: "500",
   },
   errorText: {
     fontSize: 17,
-    color: "#D32F2F",
+    color: COLORS.errorRed,
     textAlign: 'center',
     marginBottom: 15,
   },
   retryButton: {
-    backgroundColor: "#007BFF",
+    backgroundColor: COLORS.accentOrange,
     paddingVertical: 10,
     paddingHorizontal: 25,
     borderRadius: 8,
     elevation: 2,
   },
   retryButtonText: {
-    color: "#fff",
+    color: COLORS.white,
     fontSize: 16,
     fontWeight: 'bold',
   },
   emptyText: {
     fontSize: 18,
-    color: "#444",
+    color: COLORS.darkGrey,
     textAlign: "center",
     fontWeight: "bold",
     marginBottom: 8,
   },
   emptySubtitleText: {
     fontSize: 14,
-    color: "#777",
+    color: COLORS.mediumGrey,
     textAlign: "center",
   },
   listContentContainer: {
     paddingTop: 10,
     paddingBottom: 20,
     flexGrow: 1,
+    backgroundColor: COLORS.superLightGrey,
   },
   listFooter: {
     paddingVertical: 20,
     alignItems: 'center',
+    backgroundColor: COLORS.superLightGrey,
   },
   recipeItem: {
-    backgroundColor: "#fff",
+    backgroundColor: COLORS.white,
     borderRadius: 12,
     marginVertical: 8,
     marginHorizontal: 15,
@@ -551,7 +572,7 @@ const styles = StyleSheet.create({
     height: 75,
     borderRadius: 10,
     marginRight: 15,
-    backgroundColor: "#e0e0e0",
+    backgroundColor: COLORS.textSecondary,
   },
   recipeTextContainer: {
     flex: 1,
@@ -560,7 +581,7 @@ const styles = StyleSheet.create({
   recipeName: {
     fontSize: 17,
     fontWeight: "600",
-    color: "#333",
+    color: COLORS.darkGrey,
     marginBottom: 4,
   },
   modalOverlay: {
@@ -570,7 +591,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.white,
     borderRadius: 15,
     padding: 20,
     width: '90%',
@@ -587,18 +608,18 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#333',
+    color: COLORS.darkGrey,
     marginBottom: 20,
     textAlign: 'center',
   },
   filterGroupTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#007BFF',
+    color: COLORS.primaryBackground,
     marginTop: 15,
     marginBottom: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: COLORS.veryLightGrey,
     paddingBottom: 5,
   },
   filterOptionsContainer: {
@@ -609,21 +630,21 @@ const styles = StyleSheet.create({
   filterOption: {
     paddingVertical: 8,
     paddingHorizontal: 12,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: COLORS.veryLightGrey,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: COLORS.borderColor,
   },
   filterOptionSelected: {
-    backgroundColor: '#007BFF',
-    borderColor: '#0056b3',
+    backgroundColor: COLORS.accentOrange,
+    borderColor: COLORS.accentOrange,
   },
   filterOptionText: {
     fontSize: 15,
-    color: '#333',
+    color: COLORS.darkGrey,
   },
   filterOptionTextSelected: {
-    color: '#fff',
+    color: COLORS.white,
     fontWeight: '500',
   },
   modalActions: {
@@ -632,7 +653,7 @@ const styles = StyleSheet.create({
     marginTop: 25,
     paddingTop: 15,
     borderTopWidth: 1,
-    borderTopColor: '#eee',
+    borderTopColor: COLORS.veryLightGrey,
   },
   modalButton: {
     paddingVertical: 12,
@@ -642,21 +663,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   applyButton: {
-    backgroundColor: '#007BFF',
+    backgroundColor: COLORS.accentOrange,
     marginLeft: 10,
   },
   applyButtonText: {
-    color: '#fff',
+    color: COLORS.white,
     fontWeight: 'bold',
     fontSize: 16,
   },
   clearButton: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: COLORS.veryLightGrey,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: COLORS.borderColor,
   },
   clearButtonText: {
-    color: '#555',
+    color: COLORS.mediumGrey,
     fontWeight: 'bold',
     fontSize: 16,
   },
