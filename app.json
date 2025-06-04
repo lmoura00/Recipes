@@ -14,7 +14,19 @@
       "backgroundColor": "#222222"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.lsm00.recipes",
+      "buildNumber": "1.0.0",
+      "infoPlist": {
+        "UIBackgroundModes": ["fetch", "remote-notification"],
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": true
+        }
+      },
+      "config": {
+        "usesNonExemptEncryption": false,
+        "googleMapsApiKey": "AIzaSyDUyp7OcPnMcwwQejUCRkqGL4hdKd3wq2k"
+      }
     },
     "android": {
       "adaptiveIcon": {

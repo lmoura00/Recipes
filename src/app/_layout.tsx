@@ -1,7 +1,6 @@
-// Exemplo: app/_layout.tsx
 import React from "react";
 import { Stack } from "expo-router";
-import { FavoritesProvider } from "../context/FavoritesContext"; // Ajuste o caminho se necessário
+import { FavoritesProvider } from "../context/FavoritesContext"; 
 
 export default function RootLayout() {
   return (
