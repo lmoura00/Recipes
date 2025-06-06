@@ -3,22 +3,25 @@
 ![React Native](https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 ![Expo](https://img.shields.io/badge/Expo-000020?style=for-the-badge&logo=expo&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
-![GitHub stars](https://img.shields.io/github/stars/lucas-moura-610579194/Recipes?style=social)
+![GitHub stars](https://img.shields.io/github/stars/lucas-moura-610579194/ReceitasAPP?style=social)
 
 Um aplicativo móvel de receitas desenvolvido com React Native e Expo. Permite aos usuários explorar, pesquisar, filtrar e favoritar receitas de uma forma moderna e interativa. Uma das principais funcionalidades é a tradução dinâmica do conteúdo das receitas para o português, proporcionando uma experiência de usuário mais fluida.
 
 ## 📸 Screenshots
 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/00527e0d-5251-4585-a337-0616e5999533" width="45%" alt="Tela Principal">
+  <img src="https://github.com/user-attachments/assets/22e3ca4e-de04-46ca-87d3-7f32fbaf73c6" width="45%" alt="Lista de Receitas">
+</p>
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/30eefb59-33dc-4f8d-a5d0-41b69f393ba2" width="45%" alt="Detalhes da Receita">
+  <img src="https://github.com/user-attachments/assets/209f2cd7-31c1-434a-8ee4-ac330d80d0e3" width="45%" alt="Filtros (Modal)">
+</p>
+<p align="center">
+ <img src="https://github.com/user-attachments/assets/30eefb59-33dc-4f8d-a5d0-41b69f393ba2" width="45%" alt="Detalhes da Receita">
+  <img src="https://github.com/user-attachments/assets/209f2cd7-31c1-434a-8ee4-ac330d80d0e3" width="45%" alt="Filtros (Modal)">
+</p>
 
-| Tela Principal | Lista de Receitas | Detalhes da Receita |
-| :---: | :---: | :---: |
-| *![image](https://github.com/user-attachments/assets/00527e0d-5251-4585-a337-0616e5999533)
-* | *![image](https://github.com/user-attachments/assets/22e3ca4e-de04-46ca-87d3-7f32fbaf73c6)
-* | *![image](https://github.com/user-attachments/assets/30eefb59-33dc-4f8d-a5d0-41b69f393ba2)
-* |
-| **Filtros (Modal)** | **Favoritos** | **Sobre** |
-| *![image](https://github.com/user-attachments/assets/209f2cd7-31c1-434a-8ee4-ac330d80d0e3)
-* | *(adicione o screenshot aqui)* | *(adicione o screenshot aqui)* |
 
 ## ✨ Funcionalidades
 
@@ -47,30 +50,33 @@ Um aplicativo móvel de receitas desenvolvido com React Native e Expo. Permite a
 
 ## 📁 Estrutura do Projeto
 
-O projeto utiliza o **Expo Router**, que organiza as rotas baseadas na estrutura de pastas dentro do diretório `app/`.
+O projeto utiliza o **Expo Router** e segue uma estrutura organizada dentro do diretório `src/`, que é uma prática recomendada para separar o código da aplicação de arquivos de configuração.
 
-```
 .
+└── src/
 ├── app/
-│   ├── (tabs)/                # Layout principal com abas (se aplicável)
 │   ├── about/
-│   │   └── page.tsx           # Tela "Sobre"
+│   │   └── page.tsx            # Rota: /about
 │   ├── favorites/
-│   │   └── page.tsx           # Tela "Meus Favoritos"
+│   │   └── page.tsx            # Rota: /favorites
 │   ├── recipes/
-│   │   ├── [id].tsx           # Tela de Detalhes da Receita (rota dinâmica)
-│   │   └── page.tsx           # Tela de Lista de Receitas
-│   └── index.tsx              # Tela Inicial do App
-├── assets/
-│   ├── fonts/
-│   └── recipes.json           # Animações Lottie
+│   │   ├── [id].tsx            # Rota dinâmica: /recipes/[id]
+│   │   ├── _layout.tsx         # Layout compartilhado para as rotas de recipes
+│   │   └── page.tsx            # Rota: /recipes/page (Tela de Lista de Receitas)
+│   └── index.tsx               # Rota principal do app: /
+│
+├── assets/                     # Imagens, fontes e animações Lottie
+│   ├── coding.json
+│   ├── favoriteEmpty.json
+│   └── ...
+│
 ├── context/
-│   └── FavoritesContext.tsx   # Contexto para gerenciar os favoritos
-├── utils/
-│   ├── googleTranslate.ts     # Função para interagir com a API de tradução
-│   └── translations.ts        # Funções auxiliares de tradução
-└── ...
-```
+│   └── FavoritesContext.tsx    # Contexto para gerenciar o estado dos favoritos
+│
+└── utils/
+├── googleTranslate.ts      # Funções para a API de tradução
+└── translations.ts         # Funções auxiliares
+
 
 ## 🚀 Como Executar
 
@@ -86,49 +92,39 @@ Esta aplicação utiliza a API do Google Translate para as traduções dinâmica
 
 ```bash
 # Clone o repositório
-$ git clone [https://github.com/SEU_USUARIO/SEU_REPOSITORIO.git](https://github.com/SEU_USUARIO/SEU_REPOSITORIO.git)
+$ git clone [https://github.com/lucas-moura-610579194/ReceitasAPP.git](https://github.com/lucas-moura-610579194/ReceitasAPP.git)
 
 # Navegue para o diretório do projeto
-$ cd receitas-app
+$ cd ReceitasAPP
 
 # Instale as dependências
 $ npm install
 # ou
 $ yarn install
-```
+3. Configuração do Ambiente
+Crie um arquivo .env na raiz do projeto, seguindo o exemplo do .env.example (se houver) ou adicionando a seguinte variável:
 
-### 3. Configuração do Ambiente
+Snippet de código
 
-Crie um arquivo `.env` na raiz do projeto, seguindo o exemplo do `.env.example` (se houver) ou adicionando a seguinte variável:
-
-```env
 # .env
 EXPO_PUBLIC_GOOGLE_TRANSLATE_API_KEY="SUA_CHAVE_DE_API_AQUI"
-```
+Importante: O prefixo EXPO_PUBLIC_ é necessário para que a variável de ambiente seja acessível no lado do cliente com o Expo.
 
-**Importante:** O prefixo `EXPO_PUBLIC_` é necessário para que a variável de ambiente seja acessível no lado do cliente com o Expo.
+4. Executando a Aplicação
+Bash
 
-### 4. Executando a Aplicação
-
-```bash
 # Inicie o servidor de desenvolvimento do Expo
 $ npx expo start
-```
+Após iniciar, um código QR aparecerá no terminal. Use o aplicativo Expo Go (disponível na App Store e Play Store) para escanear o QR code e rodar a aplicação em seu smartphone.
 
-Após iniciar, um código QR aparecerá no terminal. Use o aplicativo **Expo Go** (disponível na [App Store](https://apps.apple.com/us/app/expo-go/id982107779) e [Play Store](https://play.google.com/store/apps/details?id=host.exp.exponent)) para escanear o QR code e rodar a aplicação em seu smartphone.
+🌐 API
+Este projeto utiliza a API gratuita DummyJSON para buscar os dados das receitas. Agradecimentos à equipe do DummyJSON por fornecer este excelente recurso para desenvolvedores.
 
-## 🌐 API
+👨‍💻 Autor
+Lucas de Moura
 
-Este projeto utiliza a API gratuita **[DummyJSON](https://dummyjson.com/docs/recipes)** para buscar os dados das receitas. Agradecimentos à equipe do DummyJSON por fornecer este excelente recurso para desenvolvedores.
-
-## 👨‍💻 Autor
-
-**Lucas de Moura**
-
--   LinkedIn: [@lucas-moura-610579194](https://www.linkedin.com/in/lucas-moura-610579194/)
--   Instagram: [@lucas.m.galvao_](https://www.instagram.com/lucas.m.galvao_/)
--   WhatsApp: [+55 86 98101-9840](https://wa.me/+5586981019840)
-
-## 📄 Licença
-
-Distribuído sob a licença MIT. Veja `LICENSE` para mais informações.
+LinkedIn: @lucas-moura-610579194
+Instagram: @lucas.m.galvao_
+WhatsApp: +55 86 98101-9840
+📄 Licença
+Distribuído sob a licença MIT. Veja LICENSE para mais informações.
