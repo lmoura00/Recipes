@@ -3,19 +3,22 @@
 ![React Native](https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 ![Expo](https://img.shields.io/badge/Expo-000020?style=for-the-badge&logo=expo&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
-![GitHub stars](https://img.shields.io/github/stars/lucas-moura-610579194/receitas-app?style=social)
+![GitHub stars](https://img.shields.io/github/stars/lucas-moura-610579194/Recipes?style=social)
 
 Um aplicativo móvel de receitas desenvolvido com React Native e Expo. Permite aos usuários explorar, pesquisar, filtrar e favoritar receitas de uma forma moderna e interativa. Uma das principais funcionalidades é a tradução dinâmica do conteúdo das receitas para o português, proporcionando uma experiência de usuário mais fluida.
 
 ## 📸 Screenshots
 
-É altamente recomendável adicionar um GIF ou screenshots aqui para mostrar o aplicativo em ação.
 
 | Tela Principal | Lista de Receitas | Detalhes da Receita |
 | :---: | :---: | :---: |
-| *(adicione o screenshot aqui)* | *(adicione o screenshot aqui)* | *(adicione o screenshot aqui)* |
+| *![image](https://github.com/user-attachments/assets/00527e0d-5251-4585-a337-0616e5999533)
+* | *![image](https://github.com/user-attachments/assets/22e3ca4e-de04-46ca-87d3-7f32fbaf73c6)
+* | *![image](https://github.com/user-attachments/assets/30eefb59-33dc-4f8d-a5d0-41b69f393ba2)
+* |
 | **Filtros (Modal)** | **Favoritos** | **Sobre** |
-| *(adicione o screenshot aqui)* | *(adicione o screenshot aqui)* | *(adicione o screenshot aqui)* |
+| *![image](https://github.com/user-attachments/assets/209f2cd7-31c1-434a-8ee4-ac330d80d0e3)
+* | *(adicione o screenshot aqui)* | *(adicione o screenshot aqui)* |
 
 ## ✨ Funcionalidades
 
