@@ -100,6 +100,6 @@ Lucas de Moura
 
 LinkedIn: @lucas-moura-610579194
 Instagram: @lucas.m.galvao_
-WhatsApp: +55 86 98101-9840
+
 📄 Licença
 Distribuído sob a licença MIT. Veja LICENSE para mais informações.
