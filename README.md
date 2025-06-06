@@ -17,10 +17,7 @@ Um aplicativo móvel de receitas desenvolvido com React Native e Expo. Permite a
   <img src="https://github.com/user-attachments/assets/30eefb59-33dc-4f8d-a5d0-41b69f393ba2" width="45%" alt="Detalhes da Receita">
   <img src="https://github.com/user-attachments/assets/209f2cd7-31c1-434a-8ee4-ac330d80d0e3" width="45%" alt="Filtros (Modal)">
 </p>
-<p align="center">
- <img src="https://github.com/user-attachments/assets/30eefb59-33dc-4f8d-a5d0-41b69f393ba2" width="45%" alt="Detalhes da Receita">
-  <img src="https://github.com/user-attachments/assets/209f2cd7-31c1-434a-8ee4-ac330d80d0e3" width="45%" alt="Filtros (Modal)">
-</p>
+
 
 
 ## ✨ Funcionalidades
@@ -52,30 +49,8 @@ Um aplicativo móvel de receitas desenvolvido com React Native e Expo. Permite a
 
 O projeto utiliza o **Expo Router** e segue uma estrutura organizada dentro do diretório `src/`, que é uma prática recomendada para separar o código da aplicação de arquivos de configuração.
 
-.
-└── src/
-├── app/
-│   ├── about/
-│   │   └── page.tsx            # Rota: /about
-│   ├── favorites/
-│   │   └── page.tsx            # Rota: /favorites
-│   ├── recipes/
-│   │   ├── [id].tsx            # Rota dinâmica: /recipes/[id]
-│   │   ├── _layout.tsx         # Layout compartilhado para as rotas de recipes
-│   │   └── page.tsx            # Rota: /recipes/page (Tela de Lista de Receitas)
-│   └── index.tsx               # Rota principal do app: /
-│
-├── assets/                     # Imagens, fontes e animações Lottie
-│   ├── coding.json
-│   ├── favoriteEmpty.json
-│   └── ...
-│
-├── context/
-│   └── FavoritesContext.tsx    # Contexto para gerenciar o estado dos favoritos
-│
-└── utils/
-├── googleTranslate.ts      # Funções para a API de tradução
-└── translations.ts         # Funções auxiliares
+![image](https://github.com/user-attachments/assets/f0a0fa3a-f8c4-4669-950c-c0f3320bd60c)
+
 
 
 ## 🚀 Como Executar
