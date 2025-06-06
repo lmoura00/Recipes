@@ -1,4 +1,4 @@
-#ReceitasAPP
+# ReceitasAPP
 
 ![React Native](https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 ![Expo](https://img.shields.io/badge/Expo-000020?style=for-the-badge&logo=expo&logoColor=white)
@@ -7,7 +7,7 @@
 
 Um aplicativo móvel de receitas desenvolvido com React Native e Expo. Permite aos usuários explorar, pesquisar, filtrar e favoritar receitas de uma forma moderna e interativa. Uma das principais funcionalidades é a tradução dinâmica do conteúdo das receitas para o português, proporcionando uma experiência de usuário mais fluida.
 
-##📸 Screenshots
+## 📸 Screenshots
 
 É altamente recomendável adicionar um GIF ou screenshots aqui para mostrar o aplicativo em ação.
 
@@ -17,7 +17,7 @@ Um aplicativo móvel de receitas desenvolvido com React Native e Expo. Permite a
 | **Filtros (Modal)** | **Favoritos** | **Sobre** |
 | *(adicione o screenshot aqui)* | *(adicione o screenshot aqui)* | *(adicione o screenshot aqui)* |
 
-##✨ Funcionalidades
+## ✨ Funcionalidades
 
 -   **Navegação Principal**: Tela de boas-vindas com acesso rápido às seções principais.
 -   **Explorar Receitas**: Lista infinita de receitas carregadas sob demanda.
