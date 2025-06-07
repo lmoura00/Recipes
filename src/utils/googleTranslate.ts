@@ -1,6 +1,6 @@
 import axios from 'axios';
 //
-const GOOGLE_API_KEY = '';
+const GOOGLE_API_KEY = 'AIzaSyBbQuU-4d1OiQX6bwt6AL6eRVUF75632Jk';
 const GOOGLE_TRANSLATE_URL = `https://translation.googleapis.com/language/translate/v2?key=${GOOGLE_API_KEY}`;
 
 interface GoogleTranslation {
