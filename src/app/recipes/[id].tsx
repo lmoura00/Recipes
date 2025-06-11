@@ -17,8 +17,8 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Entypo from "@expo/vector-icons/Entypo";
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { useFavorites } from "../../context/FavoritesContext"; // Ajuste o caminho se necessário
-import { translateWithGoogleAPI } from "../../utils/googleTranslate"; // Ajuste o caminho se necessário
+import { useFavorites } from "../../context/FavoritesContext"; 
+import { translateWithGoogleAPI } from "../../utils/googleTranslate"; 
 
 interface RecipesResponse {
   id: number;
